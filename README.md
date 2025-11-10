@@ -18,7 +18,7 @@ Galaxy Timer & Clock is a comprehensive web application that provides a variety 
 
 ### 🚀 How to Run
 
-***https://alfanrizkyw.github.io/Galaxy-Timer-Clock-by-Paan/!**
+**https://alfanrizkyw.github.io/Galaxy-Timer-Clock-by-Paan/**
 
 ---
 
