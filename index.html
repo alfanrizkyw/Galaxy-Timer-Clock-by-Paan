@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxy Timer & Clock</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #8a2be2;
+            --secondary: #4b0082;
+            --accent: #9370db;
+            --dark-purple: #2c003e;
+            --deep-space: #0f0526;
+            --star-color: #ffffff;
+            --nebula-pink: #ff69b4;
+            --nebula-blue: #00bfff;
+            --text-light: #e6e6fa;
+            --text-dark: #0a0014;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--deep-space) 0%, var(--dark-purple) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            transition: var(--transition);
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            padding: 20px;
+            z-index: 1;
+        }
+
+        /* Navigation */
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        nav {
+            display: flex;
+            background: rgba(43, 0, 65, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: 10px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 40px;
+            background: transparent;
+            color: var(--text-light);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 5px;
+        }
+
+        .nav-btn:hover {
+            background: rgba(138, 43, 226, 0.3);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+        }
+
+        /* Pages */
+        .page {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: rgba(43, 0, 65, 0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--nebula-pink), var(--nebula-blue));
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--nebula-pink), var(--nebula-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            position: relative;
+            display: inline-block;
+            color: var(--text-light);
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--nebula-pink), var(--nebula-blue));
+            border-radius: 3px;
+        }
+
+        .time-display {
+            font-size: 5rem;
+            font-weight: 700;
+            margin: 20px 0;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
+            background: linear-gradient(90deg, var(--nebula-pink), var(--nebula-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: var(--transition);
+        }
+
+        .date-display {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        .timer-display, .alarm-display, .stopwatch-time {
+            font-size: 4rem;
+            font-weight: 700;
+            margin: 20px 0;
+            color: var(--nebula-blue);
+            text-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
+        }
+
+        .timer-controls, .stopwatch-controls, .alarm-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.reset {
+            background: linear-gradient(90deg, #ff4757, #ff6b81);
+        }
+
+        button.stop {
+            background: linear-gradient(90deg, #e74c3c, #eaa29a);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        input, select {
+            padding: 12px 15px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            font-size: 1rem;
+            width: 80px;
+            text-align: center;
+            transition: var(--transition);
+            backdrop-filter: blur(5px);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--nebula-pink);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        select {
+            width: 180px;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .volume-control label {
+            font-weight: 600;
+        }
+
+        .volume-control input[type="range"] {
+            width: 150px;
+            height: 8px;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .volume-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--nebula-pink);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+            margin: 20px 0;
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.3s;
+            transform: rotate(90deg);
+            transform-origin: 50% 50%;
+        }
+
+        .lap-times, .alarm-list {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+            text-align: left;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .lap-times div, .alarm-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .alarm-item {
+            align-items: center;
+        }
+
+        .alarm-item.active {
+            border-left: 5px solid var(--nebula-pink);
+        }
+
+        .alarm-item .time {
+            font-weight: 700;
+            color: var(--nebula-blue);
+        }
+
+        .alarm-item .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .alarm-item .actions button {
+            padding: 8px 12px;
+            font-size: 0.8rem;
+        }
+
+        .world-clock-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .world-clock {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+
+        .world-clock:hover {
+            transform: translateX(5px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .world-clock .city {
+            font-weight: 600;
+        }
+
+        .world-clock .time {
+            font-weight: 700;
+            color: var(--nebula-blue);
+        }
+
+        /* Alarm Active Overlay */
+        .alarm-active-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: pulse 1s infinite;
+        }
+
+        .alarm-active-overlay.active {
+            display: flex;
+        }
+
+        .alarm-active-content {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.5);
+            border: 3px solid var(--nebula-pink);
+        }
+
+        .alarm-active-content h2 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .alarm-active-content .time {
+            font-size: 4rem;
+            color: var(--nebula-pink);
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px rgba(255, 105, 180, 0.7);
+        }
+
+        @keyframes pulse {
+            0% { background: rgba(255, 0, 0, 0.7); }
+            50% { background: rgba(255, 0, 0, 0.4); }
+            100% { background: rgba(255, 0, 0, 0.7); }
+        }
+
+        /* Galaxy Background */
+        .galaxy-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            background-color: var(--star-color);
+            border-radius: 50%;
+            animation: twinkle 5s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+
+        .nebula {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.4;
+        }
+
+        .nebula-1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--nebula-pink), transparent);
+            top: 10%;
+            left: 5%;
+            animation: float 25s infinite ease-in-out;
+        }
+
+        .nebula-2 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--nebula-blue), transparent);
+            bottom: 10%;
+            right: 5%;
+            animation: float 30s infinite ease-in-out reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(20px, 30px) rotate(5deg); }
+            50% { transform: translate(0, 50px) rotate(0deg); }
+            75% { transform: translate(-20px, 30px) rotate(-5deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .time-display {
+                font-size: 3.5rem;
+            }
+            
+            .timer-display, .alarm-display, .stopwatch-time {
+                font-size: 3rem;
+            }
+            
+            nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .nav-btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .timer-controls, .stopwatch-controls, .alarm-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 200px;
+                justify-content: center;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="galaxy-bg" id="galaxyBg">
+        <!-- Stars and nebulas will be generated by JavaScript -->
+    </div>
+
+    <div class="alarm-active-overlay" id="alarmOverlay">
+        <div class="alarm-active-content">
+            <h2>ALARM BERBUNYI!</h2>
+            <div class="time" id="alarmActiveTime">00:00</div>
+            <button id="stopAlarm"><i class="fas fa-bell-slash"></i> Matikan Alarm</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="nav-container">
+            <nav>
+                <button class="nav-btn active" data-page="home">
+                    <i class="fas fa-home"></i> Beranda
+                </button>
+                <button class="nav-btn" data-page="timer">
+                    <i class="fas fa-hourglass-half"></i> Timer
+                </button>
+                <button class="nav-btn" data-page="stopwatch">
+                    <i class="fas fa-stopwatch"></i> Stopwatch
+                </button>
+                <button class="nav-btn" data-page="alarm">
+                    <i class="fas fa-bell"></i> Alarm
+                </button>
+                <button class="nav-btn" data-page="world">
+                    <i class="fas fa-globe-americas"></i> Jam Dunia
+                </button>
+            </nav>
+        </div>
+
+        <!-- Home Page -->
+        <div class="page active" id="home">
+            <div class="card">
+                <h1>Galaxy Timer & Clock</h1>
+                <div class="time-display" id="currentTime">00:00:00</div>
+                <div class="date-display" id="currentDate">Hari, Tanggal Bulan Tahun</div>
+                <p style="margin-top: 20px; opacity: 0.8;">Pilih menu di atas untuk menggunakan fitur lainnya</p>
+            </div>
+        </div>
+
+        <!-- Timer Page -->
+        <div class="page" id="timer">
+            <div class="card">
+                <h2>Timer</h2>
+                <div class="timer-display" id="timerDisplay">00:00:00</div>
+                <div class="input-group">
+                    <input type="number" id="hoursInput" min="0" max="23" value="0" placeholder="Jam">
+                    <input type="number" id="minutesInput" min="0" max="59" value="0" placeholder="Menit">
+                    <input type="number" id="secondsInput" min="0" max="59" value="0" placeholder="Detik">
+                </div>
+                <div class="timer-controls">
+                    <button id="startTimer"><i class="fas fa-play"></i> Mulai</button>
+                    <button id="pauseTimer"><i class="fas fa-pause"></i> Jeda</button>
+                    <button id="resetTimer" class="reset"><i class="fas fa-redo"></i> Reset</button>
+                </div>
+                <svg class="progress-ring" width="200" height="200">
+                    <circle class="progress-ring-circle" stroke="url(#gradient)" stroke-width="10" fill="transparent" r="85" cx="100" cy="100"/>
+                    <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#ff69b4" />
+                            <stop offset="100%" stop-color="#00bfff" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Stopwatch Page -->
+        <div class="page" id="stopwatch">
+            <div class="card">
+                <h2>Stopwatch</h2>
+                <div class="stopwatch-time" id="stopwatchDisplay">00:00:00.00</div>
+                <div class="stopwatch-controls">
+                    <button id="startStopwatch"><i class="fas fa-play"></i> Mulai</button>
+                    <button id="lapStopwatch"><i class="fas fa-flag"></i> Putaran</button>
+                    <button id="resetStopwatch" class="reset"><i class="fas fa-redo"></i> Reset</button>
+                </div>
+                <div class="lap-times" id="lapTimes"></div>
+            </div>
+        </div>
+
+        <!-- Alarm Page -->
+        <div class="page" id="alarm">
+            <div class="card">
+                <h2>Alarm</h2>
+                <div class="alarm-display" id="alarmDisplay">00:00</div>
+                <div class="input-group">
+                    <input type="number" id="alarmHours" min="0" max="23" value="0" placeholder="Jam">
+                    <input type="number" id="alarmMinutes" min="0" max="59" value="0" placeholder="Menit">
+                    <select id="alarmSound">
+                        <option value="beep">Beep</option>
+                        <option value="chime">Chime</option>
+                        <option value="bell">Bell</option>
+                        <option value="digital">Digital</option>
+                    </select>
+                </div>
+                <!-- Volume Control Added -->
+                <div class="volume-control">
+                    <label for="alarmVolume">Volume:</label>
+                    <input type="range" id="alarmVolume" min="0" max="100" value="50">
+                    <span id="volumeValue">50%</span>
+                </div>
+                <div class="alarm-controls">
+                    <button id="setAlarm"><i class="fas fa-bell"></i> Set Alarm</button>
+                    <button id="testAlarm"><i class="fas fa-volume-up"></i> Test Suara</button>
+                </div>
+                <div class="alarm-list" id="alarmList">
+                    <!-- Daftar alarm akan ditampilkan di sini -->
+                </div>
+            </div>
+        </div>
+
+        <!-- World Clock Page -->
+        <div class="page" id="world">
+            <div class="card">
+                <h2>Jam Dunia</h2>
+                <div class="world-clock-container" id="worldClocks">
+                    <!-- World clocks will be added here dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // React-style state management
+        const state = {
+            currentPage: 'home',
+            timer: {
+                totalSeconds: 0,
+                running: false,
+                interval: null
+            },
+            stopwatch: {
+                totalMilliseconds: 0,
+                running: false,
+                interval: null,
+                laps: [],
+                lapCount: 1
+            },
+            alarm: {
+                alarms: [],
+                activeAlarm: null,
+                audioContext: null,
+                oscillator: null,
+                volume: 0.5
+            }
+        };
+
+        // React-style component rendering
+        const render = {
+            // Navigation
+            updateNavigation() {
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    const pageId = btn.getAttribute('data-page');
+                    btn.classList.toggle('active', state.currentPage === pageId);
+                });
+                
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.toggle('active', page.id === state.currentPage);
+                });
+            },
+            
+            // Clock
+            updateClock() {
+                const now = new Date();
+                
+                // Format time
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
+                
+                // Format date
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                document.getElementById('currentDate').textContent = now.toLocaleDateString('id-ID', options);
+            },
+            
+            // Timer
+            updateTimerDisplay() {
+                const hours = Math.floor(state.timer.totalSeconds / 3600);
+                const minutes = Math.floor((state.timer.totalSeconds % 3600) / 60);
+                const seconds = state.timer.totalSeconds % 60;
+                
+                document.getElementById('timerDisplay').textContent = 
+                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                
+                // Update progress ring
+                const hoursInput = parseInt(document.getElementById('hoursInput').value) || 0;
+                const minutesInput = parseInt(document.getElementById('minutesInput').value) || 0;
+                const secondsInput = parseInt(document.getElementById('secondsInput').value) || 0;
+                const totalTime = hoursInput * 3600 + minutesInput * 60 + secondsInput;
+                
+                if (totalTime > 0) {
+                    const circumference = 2 * Math.PI * 85;
+                    const progress = (state.timer.totalSeconds / totalTime) * circumference;
+                    document.querySelector('.progress-ring-circle').style.strokeDashoffset = progress;
+                }
+            },
+            
+            // Stopwatch
+            updateStopwatchDisplay() {
+                const milliseconds = state.stopwatch.totalMilliseconds % 1000;
+                const seconds = Math.floor((state.stopwatch.totalMilliseconds / 1000) % 60);
+                const minutes = Math.floor((state.stopwatch.totalMilliseconds / (1000 * 60)) % 60);
+                const hours = Math.floor(state.stopwatch.totalMilliseconds / (1000 * 60 * 60));
+                
+                document.getElementById('stopwatchDisplay').textContent = 
+                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(Math.floor(milliseconds / 10)).padStart(2, '0')}`;
+            },
+            
+            updateLapTimes() {
+                const lapTimesElement = document.getElementById('lapTimes');
+                lapTimesElement.innerHTML = '';
+                
+                state.stopwatch.laps.forEach((lap, index) => {
+                    const lapElement = document.createElement('div');
+                    lapElement.innerHTML = `<span>Putaran ${state.stopwatch.laps.length - index}</span><span>${lap}</span>`;
+                    lapTimesElement.appendChild(lapElement);
+                });
+            },
+            
+            // Alarm
+            updateAlarmList() {
+                const alarmListElement = document.getElementById('alarmList');
+                alarmListElement.innerHTML = '';
+                
+                if (state.alarm.alarms.length === 0) {
+                    alarmListElement.innerHTML = '<div style="text-align: center; padding: 20px; opacity: 0.7;">Belum ada alarm yang diset</div>';
+                    return;
+                }
+                
+                state.alarm.alarms.forEach((alarm, index) => {
+                    const alarmItem = document.createElement('div');
+                    alarmItem.className = `alarm-item ${alarm.active ? 'active' : ''}`;
+                    alarmItem.innerHTML = `
+                        <div class="time">${alarm.time}</div>
+                        <div class="sound">${alarm.sound}</div>
+                        <div class="actions">
+                            <button class="toggle-alarm" data-index="${index}">
+                                <i class="fas ${alarm.active ? 'fa-bell-slash' : 'fa-bell'}"></i>
+                            </button>
+                            <button class="delete-alarm" data-index="${index}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    alarmListElement.appendChild(alarmItem);
+                });
+                
+                // Add event listeners for toggle and delete buttons
+                document.querySelectorAll('.toggle-alarm').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        actions.toggleAlarm(index);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-alarm').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        actions.deleteAlarm(index);
+                    });
+                });
+            },
+            
+            // World Clock
+            updateWorldClocks() {
+                const worldClocksElement = document.getElementById('worldClocks');
+                worldClocksElement.innerHTML = '';
+                
+                const timezones = [
+                    { city: 'New York', tz: 'America/New_York' },
+                    { city: 'London', tz: 'Europe/London' },
+                    { city: 'Tokyo', tz: 'Asia/Tokyo' },
+                    { city: 'Sydney', tz: 'Australia/Sydney' }
+                ];
+                
+                timezones.forEach(({ city, tz }) => {
+                    const now = new Date();
+                    const timeString = now.toLocaleTimeString('id-ID', { 
+                        timeZone: tz,
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+                    
+                    const clockElement = document.createElement('div');
+                    clockElement.className = 'world-clock';
+                    clockElement.innerHTML = `
+                        <div class="city">${city}</div>
+                        <div class="time">${timeString}</div>
+                    `;
+                    
+                    worldClocksElement.appendChild(clockElement);
+                });
+            },
+            
+            // Volume Control
+            updateVolumeDisplay() {
+                document.getElementById('volumeValue').textContent = `${Math.round(state.alarm.volume * 100)}%`;
+            }
+        };
+
+        // React-style actions
+        const actions = {
+            // Navigation
+            navigate(pageId) {
+                state.currentPage = pageId;
+                render.updateNavigation();
+            },
+            
+            // Timer
+            startTimer() {
+                if (state.timer.running) return;
+                
+                const hoursInput = parseInt(document.getElementById('hoursInput').value) || 0;
+                const minutesInput = parseInt(document.getElementById('minutesInput').value) || 0;
+                const secondsInput = parseInt(document.getElementById('secondsInput').value) || 0;
+                
+                state.timer.totalSeconds = hoursInput * 3600 + minutesInput * 60 + secondsInput;
+                
+                if (state.timer.totalSeconds <= 0) return;
+                
+                state.timer.running = true;
+                render.updateTimerDisplay();
+                
+                state.timer.interval = setInterval(() => {
+                    state.timer.totalSeconds--;
+                    render.updateTimerDisplay();
+                    
+                    if (state.timer.totalSeconds <= 0) {
+                        clearInterval(state.timer.interval);
+                        state.timer.running = false;
+                        actions.playAlarmSound('beep', false);
+                        alert('Timer selesai!');
+                    }
+                }, 1000);
+            },
+            
+            pauseTimer() {
+                clearInterval(state.timer.interval);
+                state.timer.running = false;
+            },
+            
+            resetTimer() {
+                clearInterval(state.timer.interval);
+                state.timer.running = false;
+                state.timer.totalSeconds = 0;
+                document.getElementById('hoursInput').value = 0;
+                document.getElementById('minutesInput').value = 0;
+                document.getElementById('secondsInput').value = 0;
+                render.updateTimerDisplay();
+            },
+            
+            // Stopwatch
+            startStopwatch() {
+                if (state.stopwatch.running) return;
+                
+                state.stopwatch.running = true;
+                const startTime = Date.now() - state.stopwatch.totalMilliseconds;
+                
+                state.stopwatch.interval = setInterval(() => {
+                    state.stopwatch.totalMilliseconds = Date.now() - startTime;
+                    render.updateStopwatchDisplay();
+                }, 10);
+            },
+            
+            pauseStopwatch() {
+                clearInterval(state.stopwatch.interval);
+                state.stopwatch.running = false;
+            },
+            
+            resetStopwatch() {
+                clearInterval(state.stopwatch.interval);
+                state.stopwatch.running = false;
+                state.stopwatch.totalMilliseconds = 0;
+                state.stopwatch.laps = [];
+                state.stopwatch.lapCount = 1;
+                render.updateStopwatchDisplay();
+                render.updateLapTimes();
+            },
+            
+            lapStopwatch() {
+                if (!state.stopwatch.running) return;
+                
+                state.stopwatch.laps.unshift(document.getElementById('stopwatchDisplay').textContent);
+                render.updateLapTimes();
+                state.stopwatch.lapCount++;
+            },
+            
+            // Alarm
+            setAlarm() {
+                const hours = parseInt(document.getElementById('alarmHours').value) || 0;
+                const minutes = parseInt(document.getElementById('alarmMinutes').value) || 0;
+                const sound = document.getElementById('alarmSound').value;
+                
+                if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+                    alert('Masukkan waktu yang valid!');
+                    return;
+                }
+                
+                const alarmTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                
+                // Check if alarm already exists
+                if (state.alarm.alarms.some(alarm => alarm.time === alarmTime)) {
+                    alert('Alarm pada waktu ini sudah ada!');
+                    return;
+                }
+                
+                const alarm = {
+                    time: alarmTime,
+                    sound: sound,
+                    active: true
+                };
+                
+                state.alarm.alarms.push(alarm);
+                render.updateAlarmList();
+                
+                // Reset input
+                document.getElementById('alarmHours').value = 0;
+                document.getElementById('alarmMinutes').value = 0;
+            },
+            
+            toggleAlarm(index) {
+                state.alarm.alarms[index].active = !state.alarm.alarms[index].active;
+                render.updateAlarmList();
+            },
+            
+            deleteAlarm(index) {
+                state.alarm.alarms.splice(index, 1);
+                render.updateAlarmList();
+            },
+            
+            checkAlarms(now) {
+                const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                
+                state.alarm.alarms.forEach(alarm => {
+                    if (alarm.active && alarm.time === currentTime && now.getSeconds() === 0 && !state.alarm.activeAlarm) {
+                        state.alarm.activeAlarm = alarm;
+                        document.getElementById('alarmActiveTime').textContent = alarm.time;
+                        document.getElementById('alarmOverlay').classList.add('active');
+                        actions.playAlarmSound(alarm.sound, true);
+                    }
+                });
+            },
+            
+            playAlarmSound(soundType, isContinuous) {
+                try {
+                    state.alarm.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    state.alarm.oscillator = state.alarm.audioContext.createOscillator();
+                    const gainNode = state.alarm.audioContext.createGain();
+                    
+                    state.alarm.oscillator.connect(gainNode);
+                    gainNode.connect(state.alarm.audioContext.destination);
+                    
+                    // Set different frequencies for different sounds
+                    switch(soundType) {
+                        case 'beep':
+                            state.alarm.oscillator.frequency.value = 800;
+                            break;
+                        case 'chime':
+                            state.alarm.oscillator.frequency.value = 1000;
+                            break;
+                        case 'bell':
+                            state.alarm.oscillator.frequency.value = 600;
+                            break;
+                        case 'digital':
+                            state.alarm.oscillator.frequency.value = 1200;
+                            break;
+                        default:
+                            state.alarm.oscillator.frequency.value = 800;
+                    }
+                    
+                    gainNode.gain.value = state.alarm.volume;
+                    state.alarm.oscillator.start();
+                    
+                    if (!isContinuous) {
+                        // Stop after 1 second for non-continuous sounds
+                        setTimeout(() => {
+                            state.alarm.oscillator.stop();
+                        }, 1000);
+                    }
+                } catch (e) {
+                    // Fallback to browser beep
+                    console.log('Beep!');
+                    if (isContinuous) {
+                        // For continuous alarm, beep every second
+                        const beepInterval = setInterval(() => {
+                            console.log('BEEP!');
+                            if (!state.alarm.activeAlarm) clearInterval(beepInterval);
+                        }, 1000);
+                    }
+                }
+            },
+            
+            stopAlarm() {
+                if (state.alarm.oscillator) {
+                    state.alarm.oscillator.stop();
+                }
+                document.getElementById('alarmOverlay').classList.remove('active');
+                state.alarm.activeAlarm = null;
+            },
+            
+            testAlarmSound() {
+                const sound = document.getElementById('alarmSound').value;
+                actions.playAlarmSound(sound, false);
+            },
+            
+            updateVolume(value) {
+                state.alarm.volume = value / 100;
+                render.updateVolumeDisplay();
+            },
+            
+            // Galaxy Background
+            createGalaxyBackground() {
+                const galaxyBg = document.getElementById('galaxyBg');
+                
+                // Create stars
+                for (let i = 0; i < 200; i++) {
+                    const star = document.createElement('div');
+                    star.className = 'star';
+                    
+                    const size = Math.random() * 3;
+                    star.style.width = `${size}px`;
+                    star.style.height = `${size}px`;
+                    
+                    star.style.left = `${Math.random() * 100}%`;
+                    star.style.top = `${Math.random() * 100}%`;
+                    
+                    star.style.animationDelay = `${Math.random() * 5}s`;
+                    
+                    galaxyBg.appendChild(star);
+                }
+                
+                // Create nebulas
+                const nebula1 = document.createElement('div');
+                nebula1.className = 'nebula nebula-1';
+                galaxyBg.appendChild(nebula1);
+                
+                const nebula2 = document.createElement('div');
+                nebula2.className = 'nebula nebula-2';
+                galaxyBg.appendChild(nebula2);
+            }
+        };
+
+        // Event Listeners
+        function initializeEventListeners() {
+            // Navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const pageId = btn.getAttribute('data-page');
+                    actions.navigate(pageId);
+                });
+            });
+            
+            // Timer
+            document.getElementById('startTimer').addEventListener('click', actions.startTimer);
+            document.getElementById('pauseTimer').addEventListener('click', actions.pauseTimer);
+            document.getElementById('resetTimer').addEventListener('click', actions.resetTimer);
+            
+            // Stopwatch
+            document.getElementById('startStopwatch').addEventListener('click', () => {
+                if (state.stopwatch.running) {
+                    actions.pauseStopwatch();
+                    document.getElementById('startStopwatch').innerHTML = '<i class="fas fa-play"></i> Mulai';
+                } else {
+                    actions.startStopwatch();
+                    document.getElementById('startStopwatch').innerHTML = '<i class="fas fa-pause"></i> Jeda';
+                }
+            });
+            
+            document.getElementById('lapStopwatch').addEventListener('click', actions.lapStopwatch);
+            document.getElementById('resetStopwatch').addEventListener('click', actions.resetStopwatch);
+            
+            // Alarm
+            document.getElementById('setAlarm').addEventListener('click', actions.setAlarm);
+            document.getElementById('testAlarm').addEventListener('click', actions.testAlarmSound);
+            document.getElementById('stopAlarm').addEventListener('click', actions.stopAlarm);
+            
+            // Volume Control
+            document.getElementById('alarmVolume').addEventListener('input', (e) => {
+                actions.updateVolume(e.target.value);
+            });
+        }
+
+        // Initialize
+        function initialize() {
+            actions.createGalaxyBackground();
+            render.updateClock();
+            render.updateWorldClocks();
+            render.updateAlarmList();
+            render.updateVolumeDisplay();
+            initializeEventListeners();
+            
+            setInterval(() => {
+                render.updateClock();
+                const now = new Date();
+                actions.checkAlarms(now);
+            }, 1000);
+            
+            setInterval(render.updateWorldClocks, 1000);
+        }
+
+        // Start the application
+        initialize();
+    </script>
+</body>
+</html>
