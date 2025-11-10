@@ -18,11 +18,7 @@ Galaxy Timer & Clock is a comprehensive web application that provides a variety 
 
 ### 🚀 How to Run
 
-1. **Copy the provided HTML code**
-2. **Save as a .html file** (example: `galaxy-timer.html`)
-3. **Open the file in a modern web browser**
-4. **No additional installation required** - all dependencies are included
-5. **Ready to use!**
+***https://alfanrizkyw.github.io/Galaxy-Timer-Clock-by-Paan/!**
 
 ---
 
